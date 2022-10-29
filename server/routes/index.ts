@@ -15,14 +15,15 @@ router.get("/search", async (req, res) => {
     const take = pageSize ? parseInt(pageSize) : 10;
     const skip = page ? parseInt(page) * take : 0;
 
-    const results = await getSavedResults(skip, take, q);
+    const data = await getSavedResults(skip, take, q);
     res.status(200).json({
       query: q,
       pageInfo: {
-        resultsPerPage: results.length,
+        resultsPerPage: data.results.length,
         currentPage: skip / take,
+        totalResults: data.totalCount,
       },
-      items: results,
+      items: data.results,
     });
   } catch (err) {
     res.status(500).json({ msg: "Something went wrong!" });

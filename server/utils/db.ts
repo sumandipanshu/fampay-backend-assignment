@@ -41,7 +41,7 @@ export const getSavedResults = async (
   skip = 0,
   take = 10,
   query?: string
-): Promise<VideoDetail[]> => {
+): Promise<{ totalCount: number; results: VideoDetail[] }> => {
   try {
     const options = {
       skip,
@@ -51,7 +51,13 @@ export const getSavedResults = async (
       },
       ...(query ? { where: { title: { search: query } } } : {}),
     };
-    return await prisma.videoDetail.findMany(options);
+    const [totalCount, results] = await prisma.$transaction([
+      prisma.videoDetail.count(
+        query ? { where: { title: { search: query } } } : {}
+      ),
+      prisma.videoDetail.findMany(options),
+    ]);
+    return { totalCount, results };
   } catch (err) {
     console.log(err);
   }
