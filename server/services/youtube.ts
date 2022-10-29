@@ -54,6 +54,7 @@ export const youtubeSearchResults = async (
     maxResults: 50,
     key: apiKeys[options.apiKeyIndex],
     pageToken: options.nextPageToken,
+    relevanceLanguage: "en",
   };
   try {
     const response = await axios.get(url, { params });

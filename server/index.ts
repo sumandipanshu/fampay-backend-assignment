@@ -4,7 +4,7 @@ import cors from "cors";
 import express from "express";
 import next from "next";
 import { fetchLatestYoutubeVideosCron } from "./utils/cron";
-import { getSavedResults } from "./utils/db";
+import router from "./routes";
 
 const port = parseInt(process.env.PORT || "3000", 10);
 const dev = process.env.NODE_ENV !== "production";
@@ -15,15 +15,15 @@ app.prepare().then(() => {
   const server = express();
 
   server.use(cors());
+  server.use(express.json());
+
+  server.use("/api", router);
   server.all("*", (req, res) => {
     return handle(req, res);
   });
 
   server.listen(port, () => {
     console.log(`> Ready on http://localhost:${port}`);
-    // fetchLatestYoutubeVideosCron();
-    getSavedResults(0, 10, "cheat jett").then(results =>
-      console.log("videos", results)
-    );
+    fetchLatestYoutubeVideosCron();
   });
 });
