@@ -1,7 +1,7 @@
 import axios from "axios";
 import { options } from "../utils/cron";
 
-interface YoutubeSearchResultItem {
+export interface YoutubeSearchResultItem {
   kind: string;
   etag: string;
   id: {
