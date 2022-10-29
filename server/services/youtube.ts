@@ -1,4 +1,5 @@
 import axios from "axios";
+import { options } from "../utils/cron";
 
 interface YoutubeSearchResultItem {
   kind: string;
@@ -36,57 +37,52 @@ interface YoutubeSearchResultItem {
 }
 
 export const youtubeSearchResults = async (
-  publishedAfter: string,
-  query = process.env.YOUTUBE_SEARCH_QUERY,
-  nextPageToken = null,
-  apiKeyIndex = 0,
-  totalResultsYet = 0
+  options: options
 ): Promise<YoutubeSearchResultItem[]> => {
-  // Base case: when query hits total search limit defined by user
-  if (totalResultsYet >= +process.env.TOTAL_RESULTS_PER_QUERY) return [];
+  // Base case: when query results hits total search limit defined by user
+  if (options.totalResultsYet >= +process.env.TOTAL_RESULTS_PER_QUERY)
+    return [];
 
   const apiKeys: string[] = JSON.parse(process.env.API_KEYS);
   const url = "https://www.googleapis.com/youtube/v3/search";
   const params = {
-    q: query,
+    q: options.query,
     type: "video",
     order: "date",
     part: "snippet",
-    publishedAfter,
+    publishedAfter: options.publishedAfter,
     maxResults: 50,
-    key: apiKeys[apiKeyIndex],
-    pageToken: nextPageToken,
+    key: apiKeys[options.apiKeyIndex],
+    pageToken: options.nextPageToken,
   };
   try {
     const response = await axios.get(url, { params });
     const results = response.data;
+    options.nextPageToken = results.nextPageToken;
+    options.totalResultsYet += results.pageInfo.resultsPerPage;
     return [
       ...results.items,
       // Recursion: Keep fetching next page results untill it hits the base case
-      ...(await youtubeSearchResults(
-        publishedAfter,
-        query,
-        results.nextPageToken,
-        apiKeyIndex,
-        totalResultsYet + results.pageInfo.resultsPerPage
-      )),
+      ...(await youtubeSearchResults(options)),
     ];
   } catch (err) {
     const apiError = err.response.data;
-    console.log(apiError);
+    console.log(
+      options.publishedAfter,
+      JSON.stringify(apiError),
+      options.apiKeyIndex
+    );
     // If current apiKey's quota limit is exceeded then use next apiKey in list
     if (
-      apiError.error.errors.reason === "quotaExceeded" &&
+      apiError.error.errors[0].reason === "quotaExceeded" &&
       apiError.error.code === 403 &&
-      apiKeyIndex + 1 < apiKeys.length
+      options.apiKeyIndex + 1 < apiKeys.length
     ) {
-      return await youtubeSearchResults(
-        query,
-        nextPageToken,
-        apiKeyIndex + 1,
-        totalResultsYet
-      );
+      options.apiKeyIndex += 1;
+      console.log("Using next apiKey", apiKeys[options.apiKeyIndex]);
+      return await youtubeSearchResults(options);
     }
+    console.log("All apiKey's Quota limit is exceeded.");
     return [];
   }
 };
