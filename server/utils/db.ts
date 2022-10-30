@@ -52,13 +52,10 @@ export const getSavedResults = async (
       },
       ...getSearchQuery(),
     };
-    // console.log("query", matchAllWordsQuery());
     const [totalCount, results] = await prisma.$transaction([
       prisma.videoDetail.count(getSearchQuery()),
       prisma.videoDetail.findMany(options),
     ]);
-    console.log(totalCount, results);
-    // const results = await prisma.videoDetail.findMany(options);
     return { totalCount, results };
   } catch (err) {
     console.log(err);

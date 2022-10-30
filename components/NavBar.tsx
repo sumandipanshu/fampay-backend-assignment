@@ -9,7 +9,6 @@ export const NavBar = ({ searchQuery, setSearchQuery }) => {
 
   const updateSearchQuery = () => setSearchQuery(query);
   const handleChange = e => {
-    console.log("query", e.target?.value);
     setQuery(e.target?.value);
   };
   const delayedQuery = useCallback(debounce(updateSearchQuery, 500), [query]);
