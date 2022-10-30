@@ -6,7 +6,6 @@ import {
   Box,
   Text,
   Image,
-  Icon,
 } from "@chakra-ui/react";
 import { AccountCircleOutlined } from "@mui/icons-material";
 import { formatDistance } from "date-fns";
