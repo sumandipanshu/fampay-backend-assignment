@@ -1,6 +1,5 @@
-import { VideoDetail } from "@prisma/client";
 import { Router } from "express";
-import { getSavedResults } from "../utils/db";
+import { getSavedResults, VideoDetail } from "../utils/db";
 
 interface Query {
   pageSize?: string;

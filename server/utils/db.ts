@@ -1,7 +1,7 @@
 import { YoutubeSearchResultItem } from "../services/youtube";
 import prisma from "./prisma";
 
-interface VideoDetail {
+export interface VideoDetail {
   id: string;
   title: string;
   description: string;
