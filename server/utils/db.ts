@@ -33,15 +33,16 @@ export const saveVideoresults = async (results: YoutubeSearchResultItem[]) => {
   }
 };
 
-// transform query to search for all words in the title
-// const matchAllWords = q => "+" + q.split(" ").join(" +");
-
 // get the stored youtube search results from db
 export const getSavedResults = async (
   skip = 0,
   take = 10,
   query?: string
 ): Promise<{ totalCount: number; results: VideoDetail[] }> => {
+  // transform into search query
+  const getSearchQuery = () => {
+    return query ? { where: { title: { search: query } } } : {};
+  };
   try {
     const options = {
       skip,
@@ -49,14 +50,15 @@ export const getSavedResults = async (
       orderBy: {
         publishedAt: "desc",
       },
-      ...(query ? { where: { title: { search: query } } } : {}),
+      ...getSearchQuery(),
     };
+    // console.log("query", matchAllWordsQuery());
     const [totalCount, results] = await prisma.$transaction([
-      prisma.videoDetail.count(
-        query ? { where: { title: { search: query } } } : {}
-      ),
+      prisma.videoDetail.count(getSearchQuery()),
       prisma.videoDetail.findMany(options),
     ]);
+    console.log(totalCount, results);
+    // const results = await prisma.videoDetail.findMany(options);
     return { totalCount, results };
   } catch (err) {
     console.log(err);
