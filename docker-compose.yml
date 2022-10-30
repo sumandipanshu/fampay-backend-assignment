@@ -1,0 +1,27 @@
+version: "3.3"
+services:
+  db:
+    image: "mysql:latest"
+    restart: always
+    environment:
+      MYSQL_DATABASE: db
+      MYSQL_ROOT_PASSWORD: password
+    expose:
+      - "3306"
+    volumes:
+      - "my-db:/var/lib/mysql"
+  app:
+    build: .
+    environment:
+      API_KEYS: >-
+        ["a","b","c"]
+      YOUTUBE_SEARCH_QUERY: "<your_query>"
+      TOTAL_RESULTS_PER_QUERY: <no_of_results_to_fetch_at_a_time>
+      QUERY_INTERVAL: <no_of_seconds>
+      DATABASE_URL: "mysql://<user>:<password>@<ip_address/domain>:<port>/<database_name>"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+volumes:
+  my-db:
